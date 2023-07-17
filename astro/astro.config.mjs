@@ -6,7 +6,6 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   outDir: "../docs",
   output: "static",
-//   publicDir: "../docs",
   site: "https://flwe.nl",
   integrations: [tailwind()]
 });

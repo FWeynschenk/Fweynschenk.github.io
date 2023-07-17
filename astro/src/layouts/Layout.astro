@@ -7,30 +7,52 @@ const { title } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="md:sidebar-shadow">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description">
+		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
+	<body class="grid">
 		<slot />
 	</body>
 </html>
 <style is:global>
-	:root {
-		--accent: 124, 58, 237;
-		--accent-gradient: linear-gradient(45deg, rgb(var(--accent)), #da62c4 30%, white 60%);
-	}
-	html {
-		font-family: system-ui, sans-serif;
-		background-color: #F6F6F6;
-	}
+	@tailwind utilities;
+
 	code {
-		font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
-			Bitstream Vera Sans Mono, Courier New, monospace;
+		font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
+			DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
 	}
+	/* * {
+  outline: 1px solid red;
+  outline-offset: -1px;
+} */
+	html {
+		background-color: #f6f6f6;
+	}
+	.sidebar {
+		--mask: conic-gradient(
+				from -150deg at right,
+				#0000,
+				#000 1deg 119deg,
+				#0000 120deg
+			)
+			50%/100% 2.42em;
+		-webkit-mask: var(--mask);
+		mask: var(--mask);
+	}
+	@responsive {
+	.sidebar-shadow {
+		background: rgb(0, 0, 0);
+		background: linear-gradient(
+			90deg,
+			rgba(0, 0, 0, 1) 15rem,
+			rgba(246, 246, 246, 1) 20.5rem
+		);
+	}
+}
 </style>
