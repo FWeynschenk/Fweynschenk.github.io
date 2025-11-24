@@ -8,7 +8,7 @@ const sections = [
       {
         title: "Hex",
         href: "/hex/",
-        description: "Strategic connection board game on a hexagonal grid. Features a Monte Carlo Tree Search (MCTS) AI opponent with adjustable board sizes. View source on GitHub.",
+        description: "Strategic connection board game on a hexagonal grid. Features a Monte Carlo Tree Search (MCTS) AI opponent with adjustable board sizes. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/hex"
         },
@@ -17,7 +17,7 @@ const sections = [
       {
         title: "Connect4",
         href: "/connect4/",
-        description: "Classic four-in-a-row strategy game. Includes an online lobby system to find matches and play against opponents in real-time. View source on GitHub.",
+        description: "Classic four-in-a-row strategy game. Includes an online lobby system to find matches and play against opponents in real-time. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/connect4"
         },
@@ -26,7 +26,7 @@ const sections = [
       {
         title: "Arcade Lobby",
         href: "/lobby/",
-        description: "Trystero based lobby system for multiplayer games. Features a chatroom and multiplayer Connect 4 implementation. View source on GitHub.",
+        description: "Trystero based lobby system for multiplayer games. Features a chatroom and multiplayer Connect 4 implementation. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/lobby"
         },
@@ -46,7 +46,7 @@ const sections = [
       {
         title: "Dotsmap",
         href: "/dotsmap/",
-        description: "Interactive map playground featuring multiple projections (Mercator, Orthographic, etc.), custom color schemes, and granular control over visualization details. View source on GitHub.",
+        description: "Interactive map playground featuring multiple projections (Mercator, Orthographic, etc.), custom color schemes, and granular control over visualization details. GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/dotsmap"
         },
@@ -55,7 +55,7 @@ const sections = [
       {
         title: "PPBricks",
         href: "/ppbricks/",
-        description: "Perfect Printable Bricks. High-quality 3D models for interlocking plastic bricks, designed for optimal 3D printing results. View source on GitHub.",
+        description: "Perfect Printable Bricks. High-quality 3D models for interlocking plastic bricks, designed for optimal 3D printing results. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/ppbricks"
         },
@@ -64,7 +64,7 @@ const sections = [
       {
         title: "UUIDs",
         href: "/uuids/",
-        description: "A streamlined tool for generating and managing Universally Unique Identifiers (UUIDs) for your development needs. View source on GitHub.",
+        description: "A streamlined tool for generating and managing Universally Unique Identifiers (UUIDs) for your development needs. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/uuids"
         },
@@ -84,7 +84,7 @@ const sections = [
       {
         title: "AI Benching",
         href: "https://github.com/FWeynschenk/AI_Benching",
-        description: "AI agent that plays the NYT Connections game daily and posts results to Bluesky (see @aiplaysconnections.bsky.social).",
+        description: "AI agent that plays the NYT Connections game daily and posts results to Bluesky \n @aiplaysconnections.bsky.social",
         descriptionLinks: {
            "@aiplaysconnections.bsky.social": "https://bsky.app/profile/aiplaysconnections.bsky.social"
         },
@@ -98,7 +98,7 @@ const sections = [
       {
         title: "Video Filters",
         href: "https://chromewebstore.google.com/detail/glkdajeidfbnmaehchohlcdcdkledpeh",
-        description: "Easy access to HTML5 video filters and shaders. Adjust brightness, contrast, saturation, and more on any video on the web. Includes a Picture-in-Picture mode button. View source on GitHub.",
+        description: "Easy access to HTML5 video filters and shaders. Adjust brightness, contrast, saturation, and more on any video on the web. Includes a Picture-in-Picture mode button. \n GitHub.",
         descriptionLinks: {
           "GitHub": "https://github.com/FWeynschenk/VideoFilters"
         },
@@ -127,7 +127,7 @@ const sections = [
         <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">{section.title}</h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {section.projects.map((project) => (
-            <a href={project.href} target={project.href.startsWith('http') ? "_blank" : null} rel={project.href.startsWith('http') ? "noopener noreferrer" : null} class="group block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
+            <div class="group relative block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
               <div class="flex items-center justify-between mb-4">
                 <span class="text-3xl">{project.icon}</span>
                 <span class="text-slate-300 group-hover:text-blue-500 transition-colors">
@@ -137,14 +137,17 @@ const sections = [
                 </span>
               </div>
               <h3 class="text-lg font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
-                {project.title}
+                <a href={project.href} target={project.href.startsWith('http') ? "_blank" : null} rel={project.href.startsWith('http') ? "noopener noreferrer" : null} class="focus:outline-none">
+                  <span class="absolute inset-0" aria-hidden="true"></span>
+                  {project.title}
+                </a>
               </h3>
-              <p class="mt-2 text-sm text-slate-500">
+              <p class="mt-2 text-sm text-slate-500 relative z-10 pointer-events-none">
                 {project.descriptionLinks ? (
                   <>
                     {project.description.split(new RegExp(`(${Object.keys(project.descriptionLinks).join('|')})`)).map((part) => (
                        project.descriptionLinks[part] ? (
-                          <a href={project.descriptionLinks[part]} target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline relative z-10" onclick="event.stopPropagation()">{part}</a>
+                          <a href={project.descriptionLinks[part]} target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline pointer-events-auto">{part}</a>
                        ) : (
                           part
                        )
@@ -154,7 +157,7 @@ const sections = [
                   project.description
                 )}
               </p>
-            </a>
+            </div>
           ))}
         </div>
       </section>
