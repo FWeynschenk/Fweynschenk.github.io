@@ -37,6 +37,12 @@ const projects = [
     href: "/lobby/",
     description: "Trystero based lobby system for multiplayer games. Features a chatroom and multiplayer Connect 4 implementation.",
     icon: "🕹️"
+  },
+  {
+    title: "Discord Attendance",
+    href: "https://github.com/FWeynschenk/discordAttendance",
+    description: "Nodejs program that connects time spent in discord voice chats to google sheets.",
+    icon: "🎙️"
   }
 ];
 ---
@@ -58,7 +64,7 @@ const projects = [
       <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Projects</h2>
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
-          <a href={project.href} class="group block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
+          <a href={project.href} target={project.href.startsWith('http') ? "_blank" : null} rel={project.href.startsWith('http') ? "noopener noreferrer" : null} class="group block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
             <div class="flex items-center justify-between mb-4">
               <span class="text-3xl">{project.icon}</span>
               <span class="text-slate-300 group-hover:text-blue-500 transition-colors">
