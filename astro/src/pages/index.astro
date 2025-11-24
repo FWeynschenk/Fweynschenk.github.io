@@ -1,48 +1,80 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
-const projects = [
+const sections = [
   {
-    title: "Dotsmap",
-    href: "/dotsmap/",
-    description: "Interactive map playground featuring multiple projections (Mercator, Orthographic, etc.), custom color schemes, and granular control over visualization details.",
-    icon: "🗺️"
+    title: "Games",
+    projects: [
+      {
+        title: "Hex",
+        href: "/hex/",
+        description: "Strategic connection board game on a hexagonal grid. Features a Monte Carlo Tree Search (MCTS) AI opponent with adjustable board sizes.",
+        icon: "⬡"
+      },
+      {
+        title: "Connect4",
+        href: "/connect4/",
+        description: "Classic four-in-a-row strategy game. Includes an online lobby system to find matches and play against opponents in real-time.",
+        icon: "🔴"
+      },
+      {
+        title: "Arcade Lobby",
+        href: "/lobby/",
+        description: "Trystero based lobby system for multiplayer games. Features a chatroom and multiplayer Connect 4 implementation.",
+        icon: "🕹️"
+      },
+      {
+        title: "Ghoul School Games",
+        href: "https://www.ghoulschool.games/",
+        description: "",
+        icon: "👻"
+      }
+    ]
   },
   {
-    title: "PPBricks",
-    href: "/ppbricks/",
-    description: "Perfect Printable Bricks. High-quality 3D models for interlocking plastic bricks, designed for optimal 3D printing results.",
-    icon: "🧱"
+    title: "Web Tools",
+    projects: [
+      {
+        title: "Dotsmap",
+        href: "/dotsmap/",
+        description: "Interactive map playground featuring multiple projections (Mercator, Orthographic, etc.), custom color schemes, and granular control over visualization details.",
+        icon: "🗺️"
+      },
+      {
+        title: "PPBricks",
+        href: "/ppbricks/",
+        description: "Perfect Printable Bricks. High-quality 3D models for interlocking plastic bricks, designed for optimal 3D printing results.",
+        icon: "🧱"
+      },
+      {
+        title: "UUIDs",
+        href: "/uuids/",
+        description: "A streamlined tool for generating and managing Universally Unique Identifiers (UUIDs) for your development needs.",
+        icon: "🆔"
+      }
+    ]
   },
   {
-    title: "Hex",
-    href: "/hex/",
-    description: "Strategic connection board game on a hexagonal grid. Features a Monte Carlo Tree Search (MCTS) AI opponent with adjustable board sizes.",
-    icon: "⬡"
+    title: "Open Source",
+    projects: [
+      {
+        title: "Discord Attendance",
+        href: "https://github.com/FWeynschenk/discordAttendance",
+        description: "Nodejs program that connects time spent in discord voice chats to google sheets.",
+        icon: "🎙️"
+      }
+    ]
   },
   {
-    title: "UUIDs",
-    href: "/uuids/",
-    description: "A streamlined tool for generating and managing Universally Unique Identifiers (UUIDs) for your development needs.",
-    icon: "🆔"
-  },
-  {
-    title: "Connect4",
-    href: "/connect4/",
-    description: "Classic four-in-a-row strategy game. Includes an online lobby system to find matches and play against opponents in real-time.",
-    icon: "🔴"
-  },
-  {
-    title: "Arcade Lobby",
-    href: "/lobby/",
-    description: "Trystero based lobby system for multiplayer games. Features a chatroom and multiplayer Connect 4 implementation.",
-    icon: "🕹️"
-  },
-  {
-    title: "Discord Attendance",
-    href: "https://github.com/FWeynschenk/discordAttendance",
-    description: "Nodejs program that connects time spent in discord voice chats to google sheets.",
-    icon: "🎙️"
+    title: "Browser Extensions",
+    projects: [
+      {
+        title: "Video Filters",
+        href: "https://chromewebstore.google.com/detail/glkdajeidfbnmaehchohlcdcdkledpeh",
+        description: "Easy access to HTML5 video filters and shaders. Adjust brightness, contrast, saturation, and more on any video on the web. Includes a Picture-in-Picture mode button.",
+        icon: "🧩"
+      }
+    ]
   }
 ];
 ---
@@ -59,50 +91,32 @@ const projects = [
       </p>
     </div>
 
-    <!-- Projects Section -->
-    <section id="projects" class="mb-16">
-      <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Projects</h2>
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <a href={project.href} target={project.href.startsWith('http') ? "_blank" : null} rel={project.href.startsWith('http') ? "noopener noreferrer" : null} class="group block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-3xl">{project.icon}</span>
-              <span class="text-slate-300 group-hover:text-blue-500 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </span>
-            </div>
-            <h3 class="text-lg font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
-              {project.title}
-            </h3>
-            <p class="mt-2 text-sm text-slate-500">
-              {project.description}
-            </p>
-          </a>
-        ))}
-      </div>
-    </section>
-
-    <!-- Chrome Extension Section -->
-    <section id="extension" class="mb-16">
-      <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">Chrome Extension</h2>
-      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-100">
-        <div class="md:flex md:items-center md:justify-between">
-          <div>
-            <h3 class="text-xl font-bold text-slate-900">Video Filters</h3>
-            <p class="mt-2 text-slate-600 max-w-2xl">
-               Easy access to HTML5 video filters and shaders. Adjust brightness, contrast, saturation, and more on any video on the web. Includes a Picture-in-Picture mode button.
-            </p>
-          </div>
-          <div class="mt-6 md:mt-0 md:ml-8 flex-shrink-0">
-            <a href="https://chromewebstore.google.com/detail/glkdajeidfbnmaehchohlcdcdkledpeh" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-              View on Chrome Web Store
+    <!-- Projects Sections -->
+    {sections.map((section) => (
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b pb-2 border-slate-200">{section.title}</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {section.projects.map((project) => (
+            <a href={project.href} target={project.href.startsWith('http') ? "_blank" : null} rel={project.href.startsWith('http') ? "noopener noreferrer" : null} class="group block p-6 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-3xl">{project.icon}</span>
+                <span class="text-slate-300 group-hover:text-blue-500 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </div>
+              <h3 class="text-lg font-medium text-slate-900 group-hover:text-blue-600 transition-colors">
+                {project.title}
+              </h3>
+              <p class="mt-2 text-sm text-slate-500">
+                {project.description}
+              </p>
             </a>
-          </div>
+          ))}
         </div>
-      </div>
-    </section>
+      </section>
+    ))}
 
     <!-- Contact Section -->
     <section id="contact-info" class="mb-12">
