@@ -72,14 +72,14 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
       <p>
         Every day you get <strong>one roll</strong>: a completely random Dutch-style numberplate.
         Older plate formats (sidecodes) are rarer, just like on the road.
-        Your plate is scanned for patterns — palindromes, primes, meme numbers, words, vintage formats and more —
-        and every pattern found earns a badge.
+        Your plate is scanned for over 60 patterns — palindromes, primes, meme numbers, words,
+        Fibonacci numbers, vintage formats and more — and every pattern found earns a badge.
       </p>
       <p>
         Badges award <strong>EP (entropy points)</strong> based on how unlikely they are:
-        Common <span class="whitespace-nowrap">(&gt;10%)</span> is worth 1 EP,
-        Uncommon 5, Rare 25, Epic 100, Legendary 500 and
-        Mythic <span class="whitespace-nowrap">(&lt;0.001%)</span> a whopping 2500 EP.
+        Common <span class="whitespace-nowrap">(&gt;10%)</span> is worth 250 EP, Uncommon 1,000,
+        Rare 5,000, Epic 25,000, Legendary 100,000 and
+        Mythic <span class="whitespace-nowrap">(&lt;0.001%)</span> a monstrous 500,000 EP.
       </p>
       <p>
         Your total EP is compared against the universe of all possible plates to grade your roll,
@@ -130,9 +130,81 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     padding: 0.35rem 0.8rem;
     align-self: center;
     white-space: nowrap;
+    display: inline-flex;
   }
-  .nl-plate.rolling .nl-text {
-    filter: blur(1px);
+  .nl-text .slot {
+    display: inline-block;
+    min-width: 1ch;
+  }
+  .nl-text .slot.spinning {
+    filter: blur(1.5px);
+    opacity: 0.65;
+  }
+  .nl-text .slot.locked {
+    animation: slotPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .nl-plate.plate-shake {
+    animation: plateShake 0.5s ease-in-out;
+  }
+
+  .badge-reveal {
+    animation: badgeIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .badge-glow {
+    animation: badgeIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both, badgeGlow 1.6s ease-in-out 0.45s 2;
+  }
+  .banner-reveal {
+    animation: bannerIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 2.2s linear infinite;
+  }
+  .ep-bump {
+    animation: epBump 0.35s ease-out;
+  }
+  .confetti-bit {
+    position: absolute;
+    top: -12px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes slotPop {
+    0% { transform: scale(1.6) translateY(-4px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  @keyframes plateShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px) rotate(-1deg); }
+    40% { transform: translateX(6px) rotate(1deg); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  @keyframes badgeIn {
+    0% { opacity: 0; transform: translateY(16px) scale(0.85); }
+    60% { opacity: 1; transform: translateY(-3px) scale(1.04); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes badgeGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(217, 70, 239, 0); }
+    50% { box-shadow: 0 0 22px rgba(217, 70, 239, 0.55); }
+  }
+  @keyframes bannerIn {
+    0% { opacity: 0; transform: scale(0.6); }
+    70% { transform: scale(1.07); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @keyframes epBump {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(105vh) rotate(660deg); opacity: 0.9; }
   }
 </style>
 
@@ -145,11 +217,15 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     cardTier,
     badgeTier,
     BADGES,
+    PROBS,
+    ALPHABET,
   } from "../scripts/platedle-core.js";
 
-  const STORAGE_KEY = "platedle-v1";
+  const STORAGE_KEY = "platedle-v2";
+  const LEGACY_KEY = "platedle-v1";
   // Day 1 = launch day.
   const EPOCH_UTC = Date.UTC(2026, 5, 12);
+  const REDUCED_MOTION = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
   const TIER_CHIP = {
     common: "bg-slate-100 text-slate-700 border-slate-300",
@@ -159,21 +235,24 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     legendary: "bg-amber-100 text-amber-800 border-amber-400",
     mythic: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-400",
   };
+  const TIER_INDEX = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
   const CARD_BANNER = {
     trash: "bg-stone-200 text-stone-600",
     common: "bg-slate-200 text-slate-700",
     uncommon: "bg-green-200 text-green-900",
     rare: "bg-blue-200 text-blue-900",
     epic: "bg-purple-200 text-purple-900",
-    legendary: "bg-amber-200 text-amber-900",
-    mythic: "bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300 text-fuchsia-900",
+    legendary: "bg-amber-200 text-amber-900 shimmer bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200",
+    mythic: "text-fuchsia-900 shimmer bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300",
   };
   const CARD_EMOJI = {
     trash: "🗑️", common: "⚪", uncommon: "🟢", rare: "🔵",
     epic: "🟣", legendary: "🟠", mythic: "🌈",
   };
+  const CONFETTI_COLORS = ["#f59e0b", "#d946ef", "#3b82f6", "#22c55e", "#ef4444", "#fde047"];
 
   const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("en-US");
 
   function todayStr() {
     return new Date().toLocaleDateString("en-CA");
@@ -182,11 +261,27 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     const [y, m, d] = dateStr.split("-").map(Number);
     return Math.round((Date.UTC(y, m - 1, d) - EPOCH_UTC) / 86400000) + 1;
   }
+
+  function rescoreRoll(roll) {
+    const plate = describePlate(roll.plate, roll.sc);
+    const { badges, ep } = scorePlate(plate);
+    return { ...roll, badges: badges.map((b) => b.id), ep, pct: cardPercentile(ep, 1000) };
+  }
+
   function loadState() {
     try {
       const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (s && Array.isArray(s.rolls)) return s;
-    } catch (e) { /* corrupt state -> start fresh */ }
+    } catch (e) { /* corrupt state -> try legacy */ }
+    try {
+      const old = JSON.parse(localStorage.getItem(LEGACY_KEY));
+      if (old && Array.isArray(old.rolls)) {
+        const s = { rolls: old.rolls.map(rescoreRoll) };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        localStorage.removeItem(LEGACY_KEY);
+        return s;
+      }
+    } catch (e) { /* no legacy state either */ }
     return { rolls: [] };
   }
   function saveState(s) {
@@ -215,55 +310,73 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     return n;
   }
 
-  function plateHTML(text, rolling = false) {
-    return `<div class="nl-plate ${rolling ? "rolling" : ""}">
+  // ---------- plate rendering ----------
+
+  function plateShellHTML(inner) {
+    return `<div class="nl-plate" id="plate">
       <span class="nl-band"><span class="nl-stars">✶✶✶</span><span>NL</span></span>
-      <span class="nl-text">${text}</span>
+      <span class="nl-text">${inner}</span>
+    </div>`;
+  }
+  function plateHTML(text) {
+    return plateShellHTML(
+      [...text].map((c) => (c === "-" ? `<span>-</span>` : `<span class="slot">${c}</span>`)).join("")
+    );
+  }
+
+  function badgeRowHTML(b, extraClass = "") {
+    const t = badgeTier(b);
+    return `<div class="flex items-center gap-3 border rounded-lg p-3 text-left ${TIER_CHIP[t.id]} ${extraClass}">
+      <span class="text-2xl">${b.emoji}</span>
+      <span class="flex-1">
+        <span class="block font-semibold">${b.name}</span>
+        <span class="block text-xs opacity-80">${b.desc}</span>
+      </span>
+      <span class="text-xs font-bold whitespace-nowrap text-right">${t.name}<br>+${fmt(t.ep)}</span>
     </div>`;
   }
 
+  function sortedRollBadges(roll) {
+    return roll.badges
+      .map((id) => badgeById[id])
+      .filter(Boolean)
+      .sort((a, b) => badgeTier(a).ep - badgeTier(b).ep || (PROBS[b.id] ?? 0) - (PROBS[a.id] ?? 0));
+  }
+
   function shareText(roll) {
-    const emojis = roll.badges.map((id) => badgeById[id]?.emoji ?? "🏅").join(" ");
+    const badges = sortedRollBadges(roll);
+    const emojis = badges.slice(-8).map((b) => b.emoji).join(" ");
     const tier = cardTier(roll.pct);
     return [
       `Platedle #${roll.day} · ${roll.plate}`,
       `${CARD_EMOJI[tier.id]} ${tier.name} plate — rarer than ${Math.round(roll.pct * 100)}% of rolls`,
-      `🏅 ${roll.badges.length} badge${roll.badges.length === 1 ? "" : "s"} · ${roll.ep} EP${emojis ? " · " + emojis : ""}`,
+      `🏅 ${badges.length} badge${badges.length === 1 ? "" : "s"} · ${fmt(roll.ep)} EP${emojis ? " · " + emojis : ""}`,
       `https://flwe.nl/platedle/`,
     ].join("\n");
   }
 
+  // ---------- static result (page load after rolling) ----------
+
   function renderResult(roll) {
     $("plate-holder").innerHTML = plateHTML(roll.plate);
     const tier = cardTier(roll.pct);
-    const badges = roll.badges.map((id) => badgeById[id]).filter(Boolean);
-    const badgeRows = badges.length
-      ? badges
-          .map((b) => {
-            const t = badgeTier(b);
-            return `<div class="flex items-center gap-3 border rounded-lg p-3 text-left ${TIER_CHIP[t.id]}">
-              <span class="text-2xl">${b.emoji}</span>
-              <span class="flex-1">
-                <span class="block font-semibold">${b.name}</span>
-                <span class="block text-xs opacity-80">${b.desc}</span>
-              </span>
-              <span class="text-xs font-bold whitespace-nowrap">${t.name} · +${t.ep} EP</span>
-            </div>`;
-          })
-          .join("")
-      : `<p class="text-slate-400 text-sm">Not a single pattern. That's almost impressive.</p>`;
-
+    const badges = sortedRollBadges(roll).reverse(); // rarest on top when static
     $("game-body").innerHTML = `
       <div class="rounded-lg px-4 py-3 font-bold mb-1 ${CARD_BANNER[tier.id]}">
-        ${CARD_EMOJI[tier.id]} ${tier.name} plate
+        ${CARD_EMOJI[tier.id]} ${tier.name} plate · ${fmt(roll.ep)} EP
       </div>
-      <p class="text-xs text-slate-400 mb-4">Rarer than ${Math.round(roll.pct * 100)}% of all possible rolls · ${roll.ep} EP</p>
-      <div class="space-y-2 mb-5">${badgeRows}</div>
+      <p class="text-xs text-slate-400 mb-4">Rarer than ${Math.round(roll.pct * 100)}% of all possible rolls</p>
+      <div id="badge-list" class="space-y-2 mb-5">${badges.map((b) => badgeRowHTML(b)).join("")}</div>
       <button id="share-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
         Share result
       </button>
       <p class="text-xs text-slate-400 mt-4">Next plate in <span id="countdown" class="font-mono"></span></p>
     `;
+    bindShare(roll);
+    startCountdown();
+  }
+
+  function bindShare(roll) {
     $("share-btn").addEventListener("click", async () => {
       const text = shareText(roll);
       try {
@@ -275,52 +388,205 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
         }
       } catch (e) { /* user cancelled share sheet */ }
     });
+  }
+
+  // ---------- roll + reveal animation ----------
+
+  let pendingTimeouts = [];
+  let spinTimer = null;
+  let animatingRoll = null;
+  function later(fn, ms) {
+    pendingTimeouts.push(setTimeout(fn, ms));
+  }
+  function cancelAnimation() {
+    pendingTimeouts.forEach(clearTimeout);
+    pendingTimeouts = [];
+    clearInterval(spinTimer);
+    spinTimer = null;
+  }
+  // Tap anywhere on the card to skip straight to the final result.
+  $("game").addEventListener("click", (e) => {
+    if (!animatingRoll) return;
+    if (e.target.closest("#roll-btn")) return; // the click that started the roll
+    const roll = animatingRoll;
+    animatingRoll = null;
+    cancelAnimation();
+    renderResult(roll);
+    renderAround();
+  });
+
+  function tickNumber(el, from, to, dur = 450) {
+    const t0 = performance.now();
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(Math.round(from + (to - from) * eased));
+      if (k < 1 && el.isConnected) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function confetti(amount = 70) {
+    const box = document.createElement("div");
+    box.className = "fixed inset-0 pointer-events-none z-50 overflow-hidden";
+    for (let i = 0; i < amount; i++) {
+      const bit = document.createElement("div");
+      bit.className = "confetti-bit";
+      const size = 5 + Math.random() * 6;
+      bit.style.cssText = `left:${Math.random() * 100}%;width:${size}px;height:${size * (0.4 + Math.random())}px;` +
+        `background:${CONFETTI_COLORS[i % CONFETTI_COLORS.length]};` +
+        `animation-duration:${1.4 + Math.random() * 1.8}s;animation-delay:${Math.random() * 0.4}s;` +
+        `border-radius:${Math.random() > 0.5 ? "50%" : "2px"};`;
+      box.appendChild(bit);
+    }
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 4000);
+  }
+
+  function doRoll() {
+    const final = generatePlate();
+    const { badges, ep } = scorePlate(final);
+    const pct = cardPercentile(ep);
+    const date = todayStr();
+    const roll = {
+      date,
+      day: dayNumber(date),
+      plate: final.text,
+      sc: final.sc,
+      ep,
+      pct,
+      badges: badges.map((b) => b.id),
+    };
+    // Persist before animating so a mid-reveal refresh doesn't eat the roll.
+    state.rolls.push(roll);
+    saveState(state);
+
+    if (REDUCED_MOTION) {
+      renderResult(roll);
+      renderAround();
+      return;
+    }
+    animatingRoll = roll;
+    animatePlate(roll, () => animateBadges(roll));
+  }
+
+  function animatePlate(roll, onDone) {
+    $("plate-holder").innerHTML = plateHTML(roll.plate);
+    $("game-body").innerHTML = `<p class="text-slate-400 text-sm animate-pulse">Spinning up the kenteken machine… <span class="opacity-60">(tap to skip)</span></p>`;
+    const slots = [...document.querySelectorAll("#plate .slot")];
+    const finals = slots.map((el) => el.textContent);
+    slots.forEach((el) => el.classList.add("spinning"));
+    const unlocked = new Set(slots.map((_, i) => i));
+
+    spinTimer = setInterval(() => {
+      for (const i of unlocked) {
+        slots[i].textContent = /[0-9]/.test(finals[i])
+          ? String(Math.floor(Math.random() * 10))
+          : ALPHABET[Math.floor(Math.random() * 26)];
+      }
+    }, 50);
+
+    slots.forEach((el, i) => {
+      const isLast = i === slots.length - 1;
+      const at = 600 + i * 300 + (isLast ? 750 : 0);
+      later(() => {
+        unlocked.delete(i);
+        el.textContent = finals[i];
+        el.classList.remove("spinning");
+        el.classList.add("locked");
+        if (isLast) {
+          clearInterval(spinTimer);
+          spinTimer = null;
+          later(onDone, 500);
+        }
+      }, at);
+    });
+  }
+
+  function animateBadges(roll) {
+    const badges = sortedRollBadges(roll); // commons first, rarest last
+    $("game-body").innerHTML = `
+      <div class="mb-3">
+        <span id="ep-counter" class="text-4xl font-extrabold text-slate-900 tabular-nums">0</span>
+        <span class="text-slate-400 font-semibold"> EP</span>
+      </div>
+      <div id="badge-list" class="space-y-2 mb-5"></div>
+      <p id="skip-hint" class="text-xs text-slate-300">tap to skip</p>
+    `;
+    const list = $("badge-list");
+    const counter = $("ep-counter");
+    let runningEp = 0;
+    let t = 500;
+
+    badges.forEach((b) => {
+      const tier = badgeTier(b);
+      const ti = TIER_INDEX[tier.id];
+      // Bigger pause before rarer badges: let the dread build.
+      t += 420 + [0, 120, 450, 800, 1200, 1600][ti];
+      later(() => {
+        const wrap = document.createElement("div");
+        wrap.innerHTML = badgeRowHTML(b, ti >= 3 ? "badge-glow" : "badge-reveal");
+        list.prepend(wrap.firstElementChild);
+        const from = runningEp;
+        runningEp += tier.ep;
+        tickNumber(counter, from, runningEp);
+        counter.classList.remove("ep-bump");
+        void counter.offsetWidth; // restart the bump animation
+        counter.classList.add("ep-bump");
+        if (ti >= 3) {
+          $("plate")?.classList.remove("plate-shake");
+          void $("plate")?.offsetWidth;
+          $("plate")?.classList.add("plate-shake");
+        }
+        if (ti >= 4) confetti(50);
+      }, t);
+    });
+
+    later(() => {
+      animatingRoll = null;
+      revealCard(roll);
+    }, t + 900);
+  }
+
+  function revealCard(roll) {
+    const tier = cardTier(roll.pct);
+    const body = $("game-body");
+    // Swap the EP counter for the rarity banner; the badge list stays put so
+    // its entrance animations don't replay.
+    body.querySelector("#ep-counter")?.closest("div")?.remove();
+    body.querySelector("#skip-hint")?.remove();
+    const top = document.createElement("template");
+    top.innerHTML = `
+      <div class="rounded-lg px-4 py-3 font-bold mb-1 banner-reveal ${CARD_BANNER[tier.id]}">
+        ${CARD_EMOJI[tier.id]} ${tier.name} plate · ${fmt(roll.ep)} EP
+      </div>
+      <p class="text-xs text-slate-400 mb-4">Rarer than ${Math.round(roll.pct * 100)}% of all possible rolls</p>`;
+    body.prepend(top.content);
+    const bottom = document.createElement("template");
+    bottom.innerHTML = `
+      <button id="share-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
+        Share result
+      </button>
+      <p class="text-xs text-slate-400 mt-4">Next plate in <span id="countdown" class="font-mono"></span></p>`;
+    body.append(bottom.content);
+    if (TIER_INDEX[tier.id] >= 3 || tier.id === "mythic") confetti(120);
+    bindShare(roll);
     startCountdown();
+    renderAround();
   }
 
   function renderRollButton() {
-    $("plate-holder").innerHTML = plateHTML("??-??-??");
+    $("plate-holder").innerHTML = plateHTML("??-???-?").replace(/<span class="slot">\?<\/span>/g, '<span class="slot opacity-40">?</span>');
     $("game-body").innerHTML = `
       <p class="text-slate-500 text-sm mb-4">Your daily plate for <strong>${todayStr()}</strong> is waiting.</p>
       <button id="roll-btn" class="bg-amber-400 hover:bg-amber-500 text-slate-900 text-lg font-extrabold px-10 py-3 rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition-all">
         🎲 Roll today's plate
       </button>
     `;
-    $("roll-btn").addEventListener("click", doRoll);
+    $("roll-btn").addEventListener("click", doRoll, { once: true });
   }
 
-  function doRoll() {
-    $("game-body").innerHTML = `<p class="text-slate-400 text-sm animate-pulse">Spinning up the kenteken machine…</p>`;
-    const final = generatePlate();
-    const ticks = 22;
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      if (i < ticks) {
-        $("plate-holder").innerHTML = plateHTML(generatePlate().text, true);
-        return;
-      }
-      clearInterval(timer);
-      const { badges, ep } = scorePlate(final);
-      const pct = cardPercentile(ep);
-      const date = todayStr();
-      const roll = {
-        date,
-        day: dayNumber(date),
-        plate: final.text,
-        sc: final.sc,
-        ep,
-        pct,
-        badges: badges.map((b) => b.id),
-      };
-      state.rolls.push(roll);
-      saveState(state);
-      renderResult(roll);
-      renderStats();
-      renderCollection();
-      renderHistory();
-    }, 65);
-  }
+  // ---------- countdown / stats / collection / history ----------
 
   let countdownTimer = null;
   function startCountdown() {
@@ -347,14 +613,14 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     const found = Object.keys(badgeCounts()).length;
     const cells = [
       { label: "Streak", value: `${streak()}🔥` },
-      { label: "Rolls", value: state.rolls.length },
-      { label: "Total EP", value: totalEp },
+      { label: "Rolls", value: fmt(state.rolls.length) },
+      { label: "Total EP", value: fmt(totalEp) },
       { label: "Badges", value: `${found}/${BADGES.length}` },
     ];
     $("stats").innerHTML = cells
       .map(
         (c) => `<div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
-          <div class="text-xl font-extrabold text-slate-900">${c.value}</div>
+          <div class="text-lg sm:text-xl font-extrabold text-slate-900 truncate">${c.value}</div>
           <div class="text-xs text-slate-400 uppercase tracking-wide">${c.label}</div>
         </div>`
       )
@@ -363,7 +629,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
 
   function renderCollection() {
     const counts = badgeCounts();
-    const sorted = [...BADGES].sort((a, b) => b.prob - a.prob);
+    const sorted = [...BADGES].sort((a, b) => (PROBS[b.id] ?? 0) - (PROBS[a.id] ?? 0));
     $("collection-summary").textContent =
       `${Object.keys(counts).length} of ${BADGES.length} badges found`;
     $("collection").innerHTML = sorted
@@ -378,7 +644,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
             <span class="block text-xs text-slate-500">${b.desc}</span>
           </span>
           <span class="text-right">
-            <span class="inline-block text-[10px] font-bold border rounded-full px-2 py-0.5 ${TIER_CHIP[t.id]}">${t.name}</span>
+            <span class="inline-block text-[10px] font-bold border rounded-full px-2 py-0.5 whitespace-nowrap ${TIER_CHIP[t.id]}">${t.name} · ${fmt(t.ep)}</span>
             <span class="block text-[10px] text-slate-400 mt-1">${owned ? `×${n}` : "not found"}</span>
           </span>
         </div>`;
@@ -393,23 +659,27 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     $("history").innerHTML = past
       .map((r) => {
         const t = cardTier(r.pct);
-        return `<div class="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm">
-          <span class="text-slate-400 w-24">#${r.day}</span>
+        return `<div class="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm">
+          <span class="text-slate-400 w-12">#${r.day}</span>
           <span class="font-mono font-bold text-slate-900">${r.plate}</span>
-          <span class="text-slate-500">${r.ep} EP</span>
-          <span class="font-semibold">${CARD_EMOJI[t.id]} ${t.name}</span>
+          <span class="text-slate-500 tabular-nums">${fmt(r.ep)} EP</span>
+          <span class="font-semibold whitespace-nowrap">${CARD_EMOJI[t.id]} ${t.name}</span>
         </div>`;
       })
       .join("");
+  }
+
+  function renderAround() {
+    renderStats();
+    renderCollection();
+    renderHistory();
   }
 
   function init() {
     const today = state.rolls.find((r) => r.date === todayStr());
     if (today) renderResult(today);
     else renderRollButton();
-    renderStats();
-    renderCollection();
-    renderHistory();
+    renderAround();
 
     // #debug lets you wipe today's roll while testing.
     if (location.hash === "#debug") {
