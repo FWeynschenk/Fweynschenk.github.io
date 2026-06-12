@@ -1,0 +1,429 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
+---
+
+<Layout
+  title="Platedle — daily numberplate roll"
+  description="Platedle: roll one random numberplate a day, discover hidden patterns, collect badges and find out how rare your plate really is."
+>
+  {ADS_ENABLED && (
+    <script
+      is:inline
+      slot="head"
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+      crossorigin="anonymous"
+    ></script>
+  )}
+
+  <main class="max-w-2xl mx-auto px-4 py-10 sm:px-6 w-full">
+    <!-- Header -->
+    <div class="mb-2">
+      <a href="/" class="text-sm text-blue-500 hover:underline">&larr; flwe.nl</a>
+    </div>
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+        Platedle <span aria-hidden="true">🚗</span>
+      </h1>
+      <p class="mt-2 text-slate-500">
+        One numberplate a day. How rare is yours?
+      </p>
+    </header>
+
+    <!-- How it works -->
+    <div class="grid grid-cols-4 gap-2 text-center text-xs sm:text-sm text-slate-500 mb-8">
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🎲</span>Roll</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🔍</span>Discover</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🏅</span>Collect</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">📣</span>Share</div>
+    </div>
+
+    <!-- Game card -->
+    <section id="game" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 text-center">
+      <div id="plate-holder" class="mb-5"></div>
+      <div id="game-body"></div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats" class="grid grid-cols-4 gap-2 mb-6"></section>
+
+    <AdSlot slot="" />
+
+    <!-- Collection -->
+    <section class="mb-6">
+      <h2 class="text-2xl font-bold text-slate-900 mb-1 border-b pb-2 border-slate-200">Badge collection</h2>
+      <p id="collection-summary" class="text-sm text-slate-500 mb-4"></p>
+      <div id="collection" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    </section>
+
+    <!-- History -->
+    <section id="history-section" class="mb-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b pb-2 border-slate-200">Previous rolls</h2>
+      <div id="history" class="space-y-2"></div>
+    </section>
+
+    <AdSlot slot="" />
+
+    <!-- Rules -->
+    <section class="mb-10 text-sm text-slate-500 space-y-3">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b pb-2 border-slate-200">How it works</h2>
+      <p>
+        Every day you get <strong>one roll</strong>: a completely random Dutch-style numberplate.
+        Older plate formats (sidecodes) are rarer, just like on the road.
+        Your plate is scanned for patterns — palindromes, primes, meme numbers, words, vintage formats and more —
+        and every pattern found earns a badge.
+      </p>
+      <p>
+        Badges award <strong>EP (entropy points)</strong> based on how unlikely they are:
+        Common <span class="whitespace-nowrap">(&gt;10%)</span> is worth 1 EP,
+        Uncommon 5, Rare 25, Epic 100, Legendary 500 and
+        Mythic <span class="whitespace-nowrap">(&lt;0.001%)</span> a whopping 2500 EP.
+      </p>
+      <p>
+        Your total EP is compared against the universe of all possible plates to grade your roll,
+        from <strong>Trash</strong> (bottom 1%) all the way up to <strong>Mythic</strong> (top 1%).
+        Come back daily to keep your streak alive and complete the badge collection.
+      </p>
+    </section>
+
+    <footer class="text-center text-slate-400 text-sm pb-8">
+      <p>&copy; {new Date().getFullYear()} Ferdinand Weynschenk · <a href="/" class="hover:underline text-blue-400">flwe.nl</a></p>
+    </footer>
+  </main>
+</Layout>
+
+<style is:global>
+  .nl-plate {
+    display: inline-flex;
+    align-items: stretch;
+    background: linear-gradient(180deg, #fdc500 0%, #f4af00 100%);
+    border: 3px solid #18181b;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+  .nl-band {
+    background: #003399;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .nl-band .nl-stars {
+    color: #ffcc00;
+    font-size: 0.7rem;
+    letter-spacing: -1px;
+  }
+  .nl-text {
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    font-weight: 800;
+    font-size: clamp(1.6rem, 7vw, 2.6rem);
+    letter-spacing: 0.08em;
+    color: #111;
+    padding: 0.35rem 0.8rem;
+    align-self: center;
+    white-space: nowrap;
+  }
+  .nl-plate.rolling .nl-text {
+    filter: blur(1px);
+  }
+</style>
+
+<script>
+  import {
+    generatePlate,
+    describePlate,
+    scorePlate,
+    cardPercentile,
+    cardTier,
+    badgeTier,
+    BADGES,
+  } from "../scripts/platedle-core.js";
+
+  const STORAGE_KEY = "platedle-v1";
+  // Day 1 = launch day.
+  const EPOCH_UTC = Date.UTC(2026, 5, 12);
+
+  const TIER_CHIP = {
+    common: "bg-slate-100 text-slate-700 border-slate-300",
+    uncommon: "bg-green-100 text-green-800 border-green-300",
+    rare: "bg-blue-100 text-blue-800 border-blue-300",
+    epic: "bg-purple-100 text-purple-800 border-purple-300",
+    legendary: "bg-amber-100 text-amber-800 border-amber-400",
+    mythic: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-400",
+  };
+  const CARD_BANNER = {
+    trash: "bg-stone-200 text-stone-600",
+    common: "bg-slate-200 text-slate-700",
+    uncommon: "bg-green-200 text-green-900",
+    rare: "bg-blue-200 text-blue-900",
+    epic: "bg-purple-200 text-purple-900",
+    legendary: "bg-amber-200 text-amber-900",
+    mythic: "bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300 text-fuchsia-900",
+  };
+  const CARD_EMOJI = {
+    trash: "🗑️", common: "⚪", uncommon: "🟢", rare: "🔵",
+    epic: "🟣", legendary: "🟠", mythic: "🌈",
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function todayStr() {
+    return new Date().toLocaleDateString("en-CA");
+  }
+  function dayNumber(dateStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return Math.round((Date.UTC(y, m - 1, d) - EPOCH_UTC) / 86400000) + 1;
+  }
+  function loadState() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (s && Array.isArray(s.rolls)) return s;
+    } catch (e) { /* corrupt state -> start fresh */ }
+    return { rolls: [] };
+  }
+  function saveState(s) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  }
+
+  let state = loadState();
+  const badgeById = Object.fromEntries(BADGES.map((b) => [b.id, b]));
+
+  function badgeCounts() {
+    const counts = {};
+    for (const roll of state.rolls)
+      for (const id of roll.badges) counts[id] = (counts[id] ?? 0) + 1;
+    return counts;
+  }
+
+  function streak() {
+    const dates = new Set(state.rolls.map((r) => r.date));
+    let n = 0;
+    const cursor = new Date();
+    if (!dates.has(cursor.toLocaleDateString("en-CA"))) cursor.setDate(cursor.getDate() - 1);
+    while (dates.has(cursor.toLocaleDateString("en-CA"))) {
+      n++;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return n;
+  }
+
+  function plateHTML(text, rolling = false) {
+    return `<div class="nl-plate ${rolling ? "rolling" : ""}">
+      <span class="nl-band"><span class="nl-stars">✶✶✶</span><span>NL</span></span>
+      <span class="nl-text">${text}</span>
+    </div>`;
+  }
+
+  function shareText(roll) {
+    const emojis = roll.badges.map((id) => badgeById[id]?.emoji ?? "🏅").join(" ");
+    const tier = cardTier(roll.pct);
+    return [
+      `Platedle #${roll.day} · ${roll.plate}`,
+      `${CARD_EMOJI[tier.id]} ${tier.name} plate — rarer than ${Math.round(roll.pct * 100)}% of rolls`,
+      `🏅 ${roll.badges.length} badge${roll.badges.length === 1 ? "" : "s"} · ${roll.ep} EP${emojis ? " · " + emojis : ""}`,
+      `https://flwe.nl/platedle/`,
+    ].join("\n");
+  }
+
+  function renderResult(roll) {
+    $("plate-holder").innerHTML = plateHTML(roll.plate);
+    const tier = cardTier(roll.pct);
+    const badges = roll.badges.map((id) => badgeById[id]).filter(Boolean);
+    const badgeRows = badges.length
+      ? badges
+          .map((b) => {
+            const t = badgeTier(b);
+            return `<div class="flex items-center gap-3 border rounded-lg p-3 text-left ${TIER_CHIP[t.id]}">
+              <span class="text-2xl">${b.emoji}</span>
+              <span class="flex-1">
+                <span class="block font-semibold">${b.name}</span>
+                <span class="block text-xs opacity-80">${b.desc}</span>
+              </span>
+              <span class="text-xs font-bold whitespace-nowrap">${t.name} · +${t.ep} EP</span>
+            </div>`;
+          })
+          .join("")
+      : `<p class="text-slate-400 text-sm">Not a single pattern. That's almost impressive.</p>`;
+
+    $("game-body").innerHTML = `
+      <div class="rounded-lg px-4 py-3 font-bold mb-1 ${CARD_BANNER[tier.id]}">
+        ${CARD_EMOJI[tier.id]} ${tier.name} plate
+      </div>
+      <p class="text-xs text-slate-400 mb-4">Rarer than ${Math.round(roll.pct * 100)}% of all possible rolls · ${roll.ep} EP</p>
+      <div class="space-y-2 mb-5">${badgeRows}</div>
+      <button id="share-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
+        Share result
+      </button>
+      <p class="text-xs text-slate-400 mt-4">Next plate in <span id="countdown" class="font-mono"></span></p>
+    `;
+    $("share-btn").addEventListener("click", async () => {
+      const text = shareText(roll);
+      try {
+        if (navigator.share) await navigator.share({ text });
+        else {
+          await navigator.clipboard.writeText(text);
+          $("share-btn").textContent = "Copied!";
+          setTimeout(() => ($("share-btn").textContent = "Share result"), 1500);
+        }
+      } catch (e) { /* user cancelled share sheet */ }
+    });
+    startCountdown();
+  }
+
+  function renderRollButton() {
+    $("plate-holder").innerHTML = plateHTML("??-??-??");
+    $("game-body").innerHTML = `
+      <p class="text-slate-500 text-sm mb-4">Your daily plate for <strong>${todayStr()}</strong> is waiting.</p>
+      <button id="roll-btn" class="bg-amber-400 hover:bg-amber-500 text-slate-900 text-lg font-extrabold px-10 py-3 rounded-xl border-b-4 border-amber-600 active:border-b-0 active:translate-y-1 transition-all">
+        🎲 Roll today's plate
+      </button>
+    `;
+    $("roll-btn").addEventListener("click", doRoll);
+  }
+
+  function doRoll() {
+    $("game-body").innerHTML = `<p class="text-slate-400 text-sm animate-pulse">Spinning up the kenteken machine…</p>`;
+    const final = generatePlate();
+    const ticks = 22;
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      if (i < ticks) {
+        $("plate-holder").innerHTML = plateHTML(generatePlate().text, true);
+        return;
+      }
+      clearInterval(timer);
+      const { badges, ep } = scorePlate(final);
+      const pct = cardPercentile(ep);
+      const date = todayStr();
+      const roll = {
+        date,
+        day: dayNumber(date),
+        plate: final.text,
+        sc: final.sc,
+        ep,
+        pct,
+        badges: badges.map((b) => b.id),
+      };
+      state.rolls.push(roll);
+      saveState(state);
+      renderResult(roll);
+      renderStats();
+      renderCollection();
+      renderHistory();
+    }, 65);
+  }
+
+  let countdownTimer = null;
+  function startCountdown() {
+    clearInterval(countdownTimer);
+    const tick = () => {
+      const el = $("countdown");
+      if (!el) return;
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(24, 0, 0, 0);
+      const ms = next - now;
+      const h = String(Math.floor(ms / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
+      el.textContent = `${h}:${m}:${s}`;
+      if (ms < 1000) location.reload();
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  function renderStats() {
+    const totalEp = state.rolls.reduce((a, r) => a + r.ep, 0);
+    const found = Object.keys(badgeCounts()).length;
+    const cells = [
+      { label: "Streak", value: `${streak()}🔥` },
+      { label: "Rolls", value: state.rolls.length },
+      { label: "Total EP", value: totalEp },
+      { label: "Badges", value: `${found}/${BADGES.length}` },
+    ];
+    $("stats").innerHTML = cells
+      .map(
+        (c) => `<div class="bg-white border border-slate-200 rounded-lg p-3 text-center">
+          <div class="text-xl font-extrabold text-slate-900">${c.value}</div>
+          <div class="text-xs text-slate-400 uppercase tracking-wide">${c.label}</div>
+        </div>`
+      )
+      .join("");
+  }
+
+  function renderCollection() {
+    const counts = badgeCounts();
+    const sorted = [...BADGES].sort((a, b) => b.prob - a.prob);
+    $("collection-summary").textContent =
+      `${Object.keys(counts).length} of ${BADGES.length} badges found`;
+    $("collection").innerHTML = sorted
+      .map((b) => {
+        const t = badgeTier(b);
+        const n = counts[b.id] ?? 0;
+        const owned = n > 0;
+        return `<div class="flex items-center gap-3 rounded-lg border p-3 ${owned ? "bg-white border-slate-200" : "bg-slate-50 border-slate-200 opacity-60"}">
+          <span class="text-2xl ${owned ? "" : "grayscale"}">${b.emoji}</span>
+          <span class="flex-1 min-w-0">
+            <span class="block font-semibold text-slate-900 text-sm">${b.name}</span>
+            <span class="block text-xs text-slate-500">${b.desc}</span>
+          </span>
+          <span class="text-right">
+            <span class="inline-block text-[10px] font-bold border rounded-full px-2 py-0.5 ${TIER_CHIP[t.id]}">${t.name}</span>
+            <span class="block text-[10px] text-slate-400 mt-1">${owned ? `×${n}` : "not found"}</span>
+          </span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  function renderHistory() {
+    const past = [...state.rolls].reverse().slice(0, 14);
+    if (!past.length) return;
+    $("history-section").classList.remove("hidden");
+    $("history").innerHTML = past
+      .map((r) => {
+        const t = cardTier(r.pct);
+        return `<div class="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm">
+          <span class="text-slate-400 w-24">#${r.day}</span>
+          <span class="font-mono font-bold text-slate-900">${r.plate}</span>
+          <span class="text-slate-500">${r.ep} EP</span>
+          <span class="font-semibold">${CARD_EMOJI[t.id]} ${t.name}</span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  function init() {
+    const today = state.rolls.find((r) => r.date === todayStr());
+    if (today) renderResult(today);
+    else renderRollButton();
+    renderStats();
+    renderCollection();
+    renderHistory();
+
+    // #debug lets you wipe today's roll while testing.
+    if (location.hash === "#debug") {
+      const btn = document.createElement("button");
+      btn.textContent = "🔧 reset today";
+      btn.className = "fixed bottom-3 right-3 text-xs bg-slate-800 text-white rounded px-3 py-1.5 opacity-70";
+      btn.onclick = () => {
+        state.rolls = state.rolls.filter((r) => r.date !== todayStr());
+        saveState(state);
+        location.reload();
+      };
+      document.body.appendChild(btn);
+    }
+  }
+
+  init();
+</script>

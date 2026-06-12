@@ -1,0 +1,38 @@
+---
+// Responsive ad unit. Renders a Google AdSense <ins> when a publisher ID is
+// configured in src/config/ads.ts, otherwise a placeholder (dev only).
+// The AdSense loader script itself is injected by the page head — see the
+// <slot name="head"> usage in platedle.astro.
+import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
+
+interface Props {
+  slot?: string; // AdSense ad-unit slot ID, e.g. "1234567890"
+  format?: string;
+  class?: string;
+}
+
+const { slot = "", format = "auto", class: className = "" } = Astro.props;
+const showPlaceholder = !ADS_ENABLED && import.meta.env.DEV;
+---
+
+{ADS_ENABLED && (
+  <div class={`my-6 text-center ${className}`}>
+    <span class="block text-[10px] uppercase tracking-widest text-slate-400 mb-1">Advertisement</span>
+    <ins
+      class="adsbygoogle"
+      style="display:block"
+      data-ad-client={ADSENSE_CLIENT}
+      data-ad-slot={slot}
+      data-ad-format={format}
+      data-full-width-responsive="true"
+    ></ins>
+    <script is:inline>
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+)}
+{showPlaceholder && (
+  <div class={`my-6 flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-100 text-sm text-slate-400 ${className}`}>
+    Ad slot — set ADSENSE_CLIENT in src/config/ads.ts
+  </div>
+)}

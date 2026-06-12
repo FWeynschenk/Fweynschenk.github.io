@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="description" content="Platedle: roll one random numberplate a day, discover hidden patterns, collect badges and find out how rare your plate really is.">
+		<meta name="viewport" content="width=device-width">
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+		<meta name="generator" content="Astro v2.8.3">
+		<title>Platedle — daily numberplate roll</title>
+		
+	<link rel="stylesheet" href="/_astro/index.bcfa2c71.css" />
+<link rel="stylesheet" href="/_astro/platedle.dbf72b3c.css" /><script type="module" src="/_astro/hoisted.f62e9c9c.js"></script></head>
+	<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+		<main class="max-w-2xl mx-auto px-4 py-10 sm:px-6 w-full">
+    <!-- Header -->
+    <div class="mb-2">
+      <a href="/" class="text-sm text-blue-500 hover:underline">&larr; flwe.nl</a>
+    </div>
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+        Platedle <span aria-hidden="true">🚗</span>
+      </h1>
+      <p class="mt-2 text-slate-500">
+        One numberplate a day. How rare is yours?
+      </p>
+    </header>
+
+    <!-- How it works -->
+    <div class="grid grid-cols-4 gap-2 text-center text-xs sm:text-sm text-slate-500 mb-8">
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🎲</span>Roll</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🔍</span>Discover</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">🏅</span>Collect</div>
+      <div class="bg-white border border-slate-200 rounded-lg p-2"><span class="block text-xl">📣</span>Share</div>
+    </div>
+
+    <!-- Game card -->
+    <section id="game" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6 text-center">
+      <div id="plate-holder" class="mb-5"></div>
+      <div id="game-body"></div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats" class="grid grid-cols-4 gap-2 mb-6"></section>
+
+    
+
+
+    <!-- Collection -->
+    <section class="mb-6">
+      <h2 class="text-2xl font-bold text-slate-900 mb-1 border-b pb-2 border-slate-200">Badge collection</h2>
+      <p id="collection-summary" class="text-sm text-slate-500 mb-4"></p>
+      <div id="collection" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    </section>
+
+    <!-- History -->
+    <section id="history-section" class="mb-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b pb-2 border-slate-200">Previous rolls</h2>
+      <div id="history" class="space-y-2"></div>
+    </section>
+
+    
+
+
+    <!-- Rules -->
+    <section class="mb-10 text-sm text-slate-500 space-y-3">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b pb-2 border-slate-200">How it works</h2>
+      <p>
+        Every day you get <strong>one roll</strong>: a completely random Dutch-style numberplate.
+        Older plate formats (sidecodes) are rarer, just like on the road.
+        Your plate is scanned for patterns — palindromes, primes, meme numbers, words, vintage formats and more —
+        and every pattern found earns a badge.
+      </p>
+      <p>
+        Badges award <strong>EP (entropy points)</strong> based on how unlikely they are:
+        Common <span class="whitespace-nowrap">(&gt;10%)</span> is worth 1 EP,
+        Uncommon 5, Rare 25, Epic 100, Legendary 500 and
+        Mythic <span class="whitespace-nowrap">(&lt;0.001%)</span> a whopping 2500 EP.
+      </p>
+      <p>
+        Your total EP is compared against the universe of all possible plates to grade your roll,
+        from <strong>Trash</strong> (bottom 1%) all the way up to <strong>Mythic</strong> (top 1%).
+        Come back daily to keep your streak alive and complete the badge collection.
+      </p>
+    </section>
+
+    <footer class="text-center text-slate-400 text-sm pb-8">
+      <p>&copy; 2026 Ferdinand Weynschenk · <a href="/" class="hover:underline text-blue-400">flwe.nl</a></p>
+    </footer>
+  </main>
+
+	</body></html>
+
