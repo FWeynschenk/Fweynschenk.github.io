@@ -78,10 +78,11 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
         found earns a badge, as does the country (and US state) itself.
       </p>
       <p>
-        Badges award <strong>EP (entropy points)</strong> based on how unlikely they are:
-        Common <span class="whitespace-nowrap">(&gt;10%)</span> is worth 250 EP, Uncommon 1,000,
-        Rare 5,000, Epic 25,000, Legendary 100,000 and
-        Mythic <span class="whitespace-nowrap">(&lt;0.001%)</span> a monstrous 500,000 EP.
+        Badges award <strong>EP (entropy points)</strong> in exact proportion to how unlikely
+        they are: every badge has its own value, growing roughly ×4 for every ×10 rarer.
+        Commons land between 150 and 400 EP, Uncommons up to ~1,600, Rares up to ~6,300,
+        Epics up to ~25,000, Legendaries up to ~100,000 — and the Mythics
+        <span class="whitespace-nowrap">(&lt;0.001%)</span> are worth hundreds of thousands.
       </p>
       <p>
         Your total EP is compared against the universe of all possible plates to grade your roll,
@@ -233,6 +234,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     cardPercentile,
     cardTier,
     badgeTier,
+    badgeEP,
     plateStyle,
     BADGES,
     PROBS,
@@ -365,7 +367,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
         <span class="block font-semibold">${b.name}</span>
         <span class="block text-xs opacity-80">${b.desc}</span>
       </span>
-      <span class="text-xs font-bold whitespace-nowrap text-right">${t.name}<br>+${fmt(t.ep)}</span>
+      <span class="text-xs font-bold whitespace-nowrap text-right">${t.name}<br>+${fmt(badgeEP(b))}</span>
     </div>`;
   }
 
@@ -373,7 +375,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
     return roll.badges
       .map((id) => badgeById[id])
       .filter(Boolean)
-      .sort((a, b) => badgeTier(a).ep - badgeTier(b).ep || (PROBS[b.id] ?? 0) - (PROBS[a.id] ?? 0));
+      .sort((a, b) => badgeEP(a) - badgeEP(b));
   }
 
   function shareText(roll) {
@@ -564,7 +566,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
         wrap.innerHTML = badgeRowHTML(b, ti >= 3 ? "badge-glow" : "badge-reveal");
         list.prepend(wrap.firstElementChild);
         const from = runningEp;
-        runningEp += tier.ep;
+        runningEp += badgeEP(b);
         tickNumber(counter, from, runningEp);
         counter.classList.remove("ep-bump");
         void counter.offsetWidth; // restart the bump animation
@@ -688,7 +690,7 @@ import { ADS_ENABLED, ADSENSE_CLIENT } from "../config/ads";
                 <span class="block text-xs text-slate-500">${b.desc}</span>
               </span>
               <span class="text-right">
-                <span class="inline-block text-[10px] font-bold border rounded-full px-2 py-0.5 whitespace-nowrap ${TIER_CHIP[t.id]}">${t.name} · ${fmt(t.ep)}</span>
+                <span class="inline-block text-[10px] font-bold border rounded-full px-2 py-0.5 whitespace-nowrap ${TIER_CHIP[t.id]}">${t.name} · ${fmt(badgeEP(b))}</span>
                 <span class="block text-[10px] text-slate-400 mt-1">${owned ? `×${n}` : "not found"}</span>
               </span>
             </div>`;
