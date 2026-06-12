@@ -1,20 +1,22 @@
 ---
 interface Props {
 	title: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const { title, description = "Ferdinand Weynschenk - Software Developer Portfolio" } = Astro.props;
 ---
 
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Ferdinand Weynschenk - Software Developer Portfolio" />
+		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<slot name="head" />
 	</head>
 	<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
 		<slot />
