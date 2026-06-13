@@ -10,6 +10,6 @@
 //
 // While ADSENSE_CLIENT is empty, AdSlot renders a dashed placeholder box in
 // dev mode and nothing at all in production builds.
-export const ADSENSE_CLIENT = "";
+export const ADSENSE_CLIENT = "ca-pub-7061053947327423";
 
 export const ADS_ENABLED = ADSENSE_CLIENT.length > 0;
